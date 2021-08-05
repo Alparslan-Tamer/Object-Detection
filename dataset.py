@@ -65,22 +65,4 @@ class YOLODataset(Dataset):
                     targets[scale_idx][anchor_on_scale, i, j, 0] = -1
         
         return image, tuple(targets)
-                    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        

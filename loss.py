@@ -78,20 +78,3 @@ class YoloLoss(nn.Module):
             + self.lambda_class * class_loss
         )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

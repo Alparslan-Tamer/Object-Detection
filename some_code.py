@@ -16,8 +16,6 @@ for i in range(8905):
 df["labels"] = my_labels
 df = df.sample(frac=1).reset_index(drop=True)
 
-df.replace(regex=r'^labels/.$', value='')
-
 train_df = df[:7000]
 test_df = df[7000:]
 

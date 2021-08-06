@@ -51,7 +51,6 @@ train_transforms = A.Compose(
             ],
             p=1.0,
         ),
-        A.HorizontalFlip(p=0.5),
         A.Blur(p=0.1),
         A.CLAHE(p=0.1),
         A.Posterize(p=0.1),

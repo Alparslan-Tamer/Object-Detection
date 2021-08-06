@@ -7,4 +7,4 @@
 Eğitim için config.py dosyasında SAVE_MODEL flagını True, LOAD_MODEL flagını ise False yapınız. Prediction için ise eğitimi bitirdikten sonra elinizde kullanıma hazır bir model olduğuna emin olduktan sonra LOAD_MODEL flagını True, SAVE_MODEL flagını ise False yapınız. Eğitimi **train.py**, Predictionı ise **prediction.py** kodlarını çalıştırarak başlatabilirsiniz.
 
 ## Eğitim
-Optimum başarıya ulaşılabilmesi adına **config.py** dosyasında değiştirilebileceği belirtilen parametrelerle oynanarak tekrar tekrar eğitim gerekmektedir. Ayrıca söylenmesi gerekirki bir noktada başarım belli bir noktada sabitlenecektir, bu aşamadan sonra nesne tespiti güçlendirecek olan şey ise veri setinin kararsızlık yaratacak olan verilerden arındırılması ve ektra yeni, temiz veriler eklenmesidir.
+Optimum başarıya ulaşılabilmesi adına **config.py** dosyasında değiştirilebileceği belirtilen parametrelerle oynanarak tekrar tekrar eğitim gerekmektedir. Bu eğitimlerin sonunda başarım belli bir noktada sabitlenecektir, bu aşamadan sonra nesne tespiti güçlendirecek olan şey ise veri setinin kararsızlık yaratacak olan verilerden arındırılması ve ektra yeni, temiz veriler eklenmesidir.

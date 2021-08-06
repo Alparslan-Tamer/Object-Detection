@@ -44,7 +44,7 @@ def prediction(x):
 
     for i in range(batch_size):
         nms_boxes = utils.non_max_suppression(
-            bboxes[i], iou_threshold=0.6, threshold=0.5, box_format="midpoint",
+            bboxes[i], iou_threshold=0.6, threshold=0.5, box_format="midpoint", # iou_threshold ve threshold ile oynayarak uygun nesne tespite ulaşabilirsin.
         )
         utils.plot_image(x[i].permute(1, 2, 0).detach().cpu(), nms_boxes) # Görselleştirme amaçlı, görselleştirme istemiyorsan bunu kapat.
 

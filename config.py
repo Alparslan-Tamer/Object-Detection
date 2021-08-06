@@ -7,15 +7,20 @@ from albumentations.pytorch import ToTensorV2
 DATASET = 'Custom_Dataset'
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 NUM_WORKERS = 4
+NUM_CLASSES = 19
+
+# Degiştirebileceğiniz parametreler
+# -----------------------------
+NUM_EPOCHS = 100
 BATCH_SIZE = 16
 IMAGE_SIZE = 416
-NUM_CLASSES = 19
 LEARNING_RATE = 1e-5
 WEIGHT_DECAY = 1e-4
-NUM_EPOCHS = 100
 CONF_THRESHOLD = 0.05
 MAP_IOU_THRESH = 0.5
 NMS_IOU_THRESH = 0.45
+# ----------------------------
+
 S = [IMAGE_SIZE // 32, IMAGE_SIZE // 16, IMAGE_SIZE // 8]
 PIN_MEMORY = True
 LOAD_MODEL = True # prediction yapacaksanız bunu True yapın (Eğer modeliniz var ise)

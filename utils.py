@@ -5,9 +5,12 @@ import numpy as np
 import os
 import random
 import torch
+import cv2
 
 from collections import Counter
 from torch.utils.data import DataLoader
+from model import YOLOv3
+import torch.optim as optim
 from tqdm import tqdm
 
 
@@ -268,6 +271,36 @@ def plot_image(image, boxes):
 
     plt.show()
 
+def plot_w_cv2(image, boxes):
+    """Plots predicted bounding boxes on the image"""
+    cmap = plt.get_cmap("tab20b")
+    class_labels = config.CUSTOM_CLASSES
+    colors = [cmap(i) for i in np.linspace(0, 255, len(class_labels))]
+    image= np.array(image)
+    height, width, _ = image.shape
+
+    for i in range(len(boxes)):
+    # extract the bounding box coordinates
+        x, y = (boxes[i][2] - boxes[i][4] / 2) * width, (boxes[i][3] - boxes[i][5] / 2) * height
+        w, h = boxes[i][4] * width, boxes[i][5] * height
+        # draw a bounding box rectangle and label on the image
+        cv2.rectangle(image, (int(x), int(y)), (int(x + w), int(y + h)), color=colors[int(boxes[i][0])], thickness=1)
+        text = f"{class_labels[int(boxes[i][0])]}: {boxes[i][1]:.2f}"
+        # calculate text width & height to draw the transparent boxes as background of the text
+        (text_width, text_height) = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1)[0]
+        text_offset_x = x
+        text_offset_y = y - 5
+        box_coords = ((int(text_offset_x), int(text_offset_y)), (int(text_offset_x) + text_width + 2, int(text_offset_y) - text_height))
+        #overlay = image.copy()
+        #cv2.rectangle(overlay, box_coords[0], box_coords[1], color=int(boxes[i][0]), thickness=cv2.FILLED)
+        # add opacity (transparency to the box)
+        #image = cv2.addWeighted(overlay, 0.6, image, 0.4, 0)
+        # now put the text (label: confidence %)
+        cv2.putText(image, text, (int(x), int(y) - 5), cv2.FONT_HERSHEY_SIMPLEX,
+            fontScale=0.5, color=(0, 0, 0), thickness=1)
+
+    cv2.imshow("Nesne Tespit", image)
+
 
 def get_evaluation_bboxes(
     loader,
@@ -432,6 +465,20 @@ def load_checkpoint(checkpoint_file, model, optimizer, lr):
     # and it will lead to many hours of debugging \:
     for param_group in optimizer.param_groups:
         param_group["lr"] = lr
+
+
+def model_load():
+    model = YOLOv3(num_classes=config.NUM_CLASSES).to(config.DEVICE)
+    optimizer = optim.Adam(
+        model.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY
+    )
+
+    if config.LOAD_MODEL:
+        load_checkpoint(
+            config.CHECKPOINT_FILE, model, optimizer, config.LEARNING_RATE
+        )
+    
+    return model
 
 
 def get_loaders(train_csv_path, test_csv_path):

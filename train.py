@@ -50,7 +50,7 @@ def train_fn(train_loader, model, optimizer, loss_fn, scaler, scaled_anchors):
         scaler.update()
 
         # update progress bar
-        mean_loss = sum(losses) / len(losses)
+        mean_loss = sum(losses) / len(losses)  
         loop.set_postfix(loss=mean_loss)
 
 

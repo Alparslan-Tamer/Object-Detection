@@ -9,19 +9,11 @@ import torch.optim as optim
 import torch
 from PIL import Image
 import numpy as np
+import cv2
 
+def prediction(x, model):
 
-def prediction(x):
-    model = YOLOv3(num_classes=config.NUM_CLASSES).to(config.DEVICE)
-    optimizer = optim.Adam(
-        model.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY
-    )
-
-    if config.LOAD_MODEL:
-        utils.load_checkpoint(
-            config.CHECKPOINT_FILE, model, optimizer, config.LEARNING_RATE
-        )
-
+    
     scaled_anchors = (
             torch.tensor(config.ANCHORS)
             * torch.tensor(config.S).unsqueeze(1).unsqueeze(1).repeat(1, 3, 2)
@@ -44,10 +36,11 @@ def prediction(x):
 
     for i in range(batch_size):
         nms_boxes = utils.non_max_suppression(
-            bboxes[i], iou_threshold=0.6, threshold=0.5, box_format="midpoint",
+            bboxes[i], iou_threshold=0.2, threshold=0.9, box_format="midpoint", # iyi bir tespit için bunun ayarlanması gerekiyor. iou_threshold ve threshold
         )
-        utils.plot_image(x[i].permute(1, 2, 0).detach().cpu(), nms_boxes) # Görselleştirme amaçlı, görselleştirme istemiyorsan bunu kapat.
-
+        
+        utils.plot_w_cv2(x[i].permute(1, 2, 0).detach().cpu(), nms_boxes) # Görselleştirme amaçlı, görselleştirme istemiyorsan bunu kapat.
+        print(nms_boxes)
         classes = []
         for box in nms_boxes:
             class_pred = box[0]
@@ -57,9 +50,11 @@ def prediction(x):
 
 
 if __name__ == "__main__":
+    model = utils.model_load()
     image_file = "00051.jpg"
     image = np.array(Image.open(image_file).convert("RGB"))
     transform = config.pred_transforms(image=image)
     image = transform["image"]
-    class_pred = prediction(image) # sahnede tespit ettiği nesnelerin değerlerini dönüyor.
+    class_pred = prediction(image, model) # sahnede tespit ettiği nesnelerin değerlerini dönüyor.
+    cv2.waitKey(5000)
     print(class_pred)

@@ -36,7 +36,7 @@ def prediction(x, model):
 
     for i in range(batch_size):
         nms_boxes = utils.non_max_suppression(
-            bboxes[i], iou_threshold=0.3, threshold=0.8, box_format="midpoint", # iyi bir tespit için bunun ayarlanması gerekiyor. iou_threshold ve threshold
+            bboxes[i], iou_threshold=0.6, threshold=0.5, box_format="midpoint", # iyi bir tespit için bunun ayarlanması gerekiyor. iou_threshold ve threshold
         )
 
         utils.plot_w_cv2(x[i].permute(1, 2, 0).detach().cpu(), nms_boxes) # Görselleştirme amaçlı, görselleştirme istemiyorsan bunu kapat.

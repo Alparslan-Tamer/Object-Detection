@@ -277,6 +277,7 @@ def plot_w_cv2(image, boxes):
     class_labels = config.CUSTOM_CLASSES
     colors = [cmap(i) for i in np.linspace(0, 255, len(class_labels))]
     image= np.array(image)
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     height, width, _ = image.shape
 
     for i in range(len(boxes)):
@@ -291,13 +292,15 @@ def plot_w_cv2(image, boxes):
         text_offset_x = x
         text_offset_y = y - 5
         box_coords = ((int(text_offset_x), int(text_offset_y)), (int(text_offset_x) + text_width + 2, int(text_offset_y) - text_height))
-        #overlay = image.copy()
-        #cv2.rectangle(overlay, box_coords[0], box_coords[1], color=int(boxes[i][0]), thickness=cv2.FILLED)
-        # add opacity (transparency to the box)
-        #image = cv2.addWeighted(overlay, 0.6, image, 0.4, 0)
-        # now put the text (label: confidence %)
-        cv2.putText(image, text, (int(x), int(y) - 5), cv2.FONT_HERSHEY_SIMPLEX,
-            fontScale=0.5, color=(0, 0, 0), thickness=1)
+        cv2.putText(
+            image,
+            text,
+            (int(text_offset_x), int(y) - 5),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            fontScale=0.4,
+            color=(255, 0, 0),
+            thickness=1,
+        )
 
     cv2.imshow("Nesne Tespit", image)
 

@@ -23,8 +23,8 @@ NMS_IOU_THRESH = 0.45
 
 S = [IMAGE_SIZE // 32, IMAGE_SIZE // 16, IMAGE_SIZE // 8]
 PIN_MEMORY = True
-LOAD_MODEL = False # prediction yapacaksanız bunu True yapın (Eğer modeliniz var ise)
-SAVE_MODEL = True # eğitim yapacaksanız bunu True yapın
+LOAD_MODEL = True # prediction yapacaksanız bunu True yapın (Eğer modeliniz var ise)
+SAVE_MODEL = False # eğitim yapacaksanız bunu True yapın
 CHECKPOINT_FILE = "checkpoint.pth.tar"
 IMG_DIR = DATASET + "/images/"
 LABEL_DIR = DATASET + "/labels/"

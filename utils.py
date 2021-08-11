@@ -120,7 +120,7 @@ def non_max_suppression(bboxes, iou_threshold, threshold, box_format="corners"):
 
 def mean_average_precision(
     pred_boxes, true_boxes, iou_threshold=0.5, box_format="midpoint", num_classes=19
-):
+): 
     """
     Video explanation of this function:
     https://youtu.be/FppOzcDvaDI
@@ -143,19 +143,8 @@ def mean_average_precision(
     epsilon = 1e-6
 
     for c in range(num_classes):
-        detections = []
-        ground_truths = []
-
-        # Go through all predictions and targets,
-        # and only add the ones that belong to the
-        # current class c
-        for detection in pred_boxes:
-            if detection[1] == c:
-                detections.append(detection)
-
-        for true_box in true_boxes:
-            if true_box[1] == c:
-                ground_truths.append(true_box)
+        detections = [detection for detection in pred_boxes if detection[1] == c]
+        ground_truths = [true_box for true_box in true_boxes if true_box[1] == c]
 
         # find the amount of bboxes for each training example
         # Counter here finds how many ground truth bboxes we get

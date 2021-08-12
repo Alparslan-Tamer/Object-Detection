@@ -6,7 +6,7 @@ import torch
 from PIL import Image, ImageFile
 from torch.utils.data import Dataset
 from utils import (
-    iou_width_height as iuo,
+    iou_width_height as iou,
 )
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -30,7 +30,7 @@ class YOLODataset(Dataset):
 
     def __getitem__(self, index):
         label_path = os.path.join(self.label_dir, self.annotations.iloc[index, 1])
-        bboxes = np.roll(np.loadtxt(fname=label_path, delimiter=" ", ndmin=2), 4, axis=1).tolist()  # [x, y, w, h, class]
+        bboxes = np.roll(np.loadtxt(fname=label_path, delimiter=" ", ndmin=2), 4, axis=1).tolist()
         img_path = os.path.join(self.img_dir, self.annotations.iloc[index, 0])
         image = np.array(Image.open(img_path).convert("RGB"))
 
@@ -39,30 +39,35 @@ class YOLODataset(Dataset):
             image = augmentations["image"]
             bboxes = augmentations["bboxes"]
 
-        targets = [torch.zeros((self.num_anchors // 3, S, S, 6)) for S in self.S]  # [p_o, x, y, w, h, c]
-
+        # Below assumes 3 scale predictions (as paper) and same num of anchors per scale
+        targets = [torch.zeros((self.num_anchors // 3, S, S, 6)) for S in self.S]
         for box in bboxes:
-            iou_anchors = iuo(torch.tensor(box[2:4]), self.anchors)
+            iou_anchors = iou(torch.tensor(box[2:4]), self.anchors)
             anchor_indices = iou_anchors.argsort(descending=True, dim=0)
             x, y, width, height, class_label = box
-            has_anchor = [False, False, False]
-
+            has_anchor = [False] * 3  # each scale should have one anchor
             for anchor_idx in anchor_indices:
                 scale_idx = anchor_idx // self.num_anchors_per_scale
                 anchor_on_scale = anchor_idx % self.num_anchors_per_scale
                 S = self.S[scale_idx]
-                i, j = int(S * y), int(S * x)
+                i, j = int(S * y), int(S * x)  # which cell
                 anchor_taken = targets[scale_idx][anchor_on_scale, i, j, 0]
-
                 if not anchor_taken and not has_anchor[scale_idx]:
                     targets[scale_idx][anchor_on_scale, i, j, 0] = 1
-                    x_cell, y_cell = S*x - j, S*y - i
-                    width_cell, height_cell = (width * S, height * S)
-                    box_coordinates = torch.tensor([x_cell, y_cell, width_cell, height_cell])
+                    x_cell, y_cell = S * x - j, S * y - i  # both between [0,1]
+                    width_cell, height_cell = (
+                        width * S,
+                        height * S,
+                    )  # can be greater than 1 since it's relative to cell
+                    box_coordinates = torch.tensor(
+                        [x_cell, y_cell, width_cell, height_cell]
+                    )
                     targets[scale_idx][anchor_on_scale, i, j, 1:5] = box_coordinates
                     targets[scale_idx][anchor_on_scale, i, j, 5] = int(class_label)
+                    has_anchor[scale_idx] = True
+
                 elif not anchor_taken and iou_anchors[anchor_idx] > self.ignore_iou_thresh:
-                    targets[scale_idx][anchor_on_scale, i, j, 0] = -1
-        
+                    targets[scale_idx][anchor_on_scale, i, j, 0] = -1  # ignore prediction
+
         return image, tuple(targets)
         

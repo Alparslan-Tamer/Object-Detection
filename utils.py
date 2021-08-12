@@ -9,8 +9,6 @@ import cv2
 
 from collections import Counter
 from torch.utils.data import DataLoader
-from model import YOLOv3
-import torch.optim as optim
 from tqdm import tqdm
 
 
@@ -26,7 +24,7 @@ def iou_width_height(boxes1, boxes2):
         boxes1[..., 1], boxes2[..., 1]
     )
     union = (
-        boxes1[..., 0] * boxes1[..., 1] + boxes2[..., 0] * boxes2[..., 1] - intersection
+            boxes1[..., 0] * boxes1[..., 1] + boxes2[..., 0] * boxes2[..., 1] - intersection
     )
     return intersection / union
 
@@ -105,12 +103,12 @@ def non_max_suppression(bboxes, iou_threshold, threshold, box_format="corners"):
             box
             for box in bboxes
             if box[0] != chosen_box[0]
-            or intersection_over_union(
+               or intersection_over_union(
                 torch.tensor(chosen_box[2:]),
                 torch.tensor(box[2:]),
                 box_format=box_format,
             )
-            < iou_threshold
+               < iou_threshold
         ]
 
         bboxes_after_nms.append(chosen_box)
@@ -119,8 +117,8 @@ def non_max_suppression(bboxes, iou_threshold, threshold, box_format="corners"):
 
 
 def mean_average_precision(
-    pred_boxes, true_boxes, iou_threshold=0.5, box_format="midpoint", num_classes=19
-): 
+        pred_boxes, true_boxes, iou_threshold=0.5, box_format="midpoint", num_classes=19
+):
     """
     Video explanation of this function:
     https://youtu.be/FppOzcDvaDI
@@ -143,8 +141,19 @@ def mean_average_precision(
     epsilon = 1e-6
 
     for c in range(num_classes):
-        detections = [detection for detection in pred_boxes if detection[1] == c]
-        ground_truths = [true_box for true_box in true_boxes if true_box[1] == c]
+        detections = []
+        ground_truths = []
+
+        # Go through all predictions and targets,
+        # and only add the ones that belong to the
+        # current class c
+        for detection in pred_boxes:
+            if detection[1] == c:
+                detections.append(detection)
+
+        for true_box in true_boxes:
+            if true_box[1] == c:
+                ground_truths.append(true_box)
 
         # find the amount of bboxes for each training example
         # Counter here finds how many ground truth bboxes we get
@@ -260,17 +269,17 @@ def plot_image(image, boxes):
 
     plt.show()
 
+
 def plot_w_cv2(image, boxes):
     """Plots predicted bounding boxes on the image"""
     cmap = plt.get_cmap("tab20b")
     class_labels = config.CUSTOM_CLASSES
     colors = [cmap(i) for i in np.linspace(0, 255, len(class_labels))]
-    image= np.array(image)
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    image = np.array(image)
     height, width, _ = image.shape
 
     for i in range(len(boxes)):
-    # extract the bounding box coordinates
+        # extract the bounding box coordinates
         x, y = (boxes[i][2] - boxes[i][4] / 2) * width, (boxes[i][3] - boxes[i][5] / 2) * height
         w, h = boxes[i][4] * width, boxes[i][5] * height
         # draw a bounding box rectangle and label on the image
@@ -280,7 +289,8 @@ def plot_w_cv2(image, boxes):
         (text_width, text_height) = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1)[0]
         text_offset_x = x
         text_offset_y = y - 5
-        box_coords = ((int(text_offset_x), int(text_offset_y)), (int(text_offset_x) + text_width + 2, int(text_offset_y) - text_height))
+        box_coords = ((int(text_offset_x), int(text_offset_y)),
+                      (int(text_offset_x) + text_width + 2, int(text_offset_y) - text_height))
         cv2.putText(
             image,
             text,
@@ -295,13 +305,13 @@ def plot_w_cv2(image, boxes):
 
 
 def get_evaluation_bboxes(
-    loader,
-    model,
-    iou_threshold,
-    anchors,
-    threshold,
-    box_format="midpoint",
-    device="cuda",
+        loader,
+        model,
+        iou_threshold,
+        anchors,
+        threshold,
+        box_format="midpoint",
+        device="cuda",
 ):
     # make sure model is in eval before get bboxes
     model.eval()
@@ -380,15 +390,16 @@ def cells_to_bboxes(predictions, anchors, S, is_preds=True):
 
     cell_indices = (
         torch.arange(S)
-        .repeat(predictions.shape[0], 3, S, 1)
-        .unsqueeze(-1)
-        .to(predictions.device)
+            .repeat(predictions.shape[0], 3, S, 1)
+            .unsqueeze(-1)
+            .to(predictions.device)
     )
     x = 1 / S * (box_predictions[..., 0:1] + cell_indices)
     y = 1 / S * (box_predictions[..., 1:2] + cell_indices.permute(0, 1, 3, 2, 4))
     w_h = 1 / S * box_predictions[..., 2:4]
     converted_bboxes = torch.cat((best_class, scores, x, y, w_h), dim=-1).reshape(BATCH_SIZE, num_anchors * S * S, 6)
     return converted_bboxes.tolist()
+
 
 def check_class_accuracy(model, loader, threshold):
     model.eval()
@@ -403,7 +414,7 @@ def check_class_accuracy(model, loader, threshold):
 
         for i in range(3):
             y[i] = y[i].to(config.DEVICE)
-            obj = y[i][..., 0] == 1 # in paper this is Iobj_i
+            obj = y[i][..., 0] == 1  # in paper this is Iobj_i
             noobj = y[i][..., 0] == 0  # in paper this is Iobj_i
 
             correct_class += torch.sum(
@@ -417,9 +428,9 @@ def check_class_accuracy(model, loader, threshold):
             correct_noobj += torch.sum(obj_preds[noobj] == y[i][..., 0][noobj])
             tot_noobj += torch.sum(noobj)
 
-    print(f"Class accuracy is: {(correct_class/(tot_class_preds+1e-16))*100:2f}%")
-    print(f"No obj accuracy is: {(correct_noobj/(tot_noobj+1e-16))*100:2f}%")
-    print(f"Obj accuracy is: {(correct_obj/(tot_obj+1e-16))*100:2f}%")
+    print(f"Class accuracy is: {(correct_class / (tot_class_preds + 1e-16)) * 100:2f}%")
+    print(f"No obj accuracy is: {(correct_noobj / (tot_noobj + 1e-16)) * 100:2f}%")
+    print(f"Obj accuracy is: {(correct_obj / (tot_obj + 1e-16)) * 100:2f}%")
     model.train()
 
 
@@ -457,20 +468,6 @@ def load_checkpoint(checkpoint_file, model, optimizer, lr):
     # and it will lead to many hours of debugging \:
     for param_group in optimizer.param_groups:
         param_group["lr"] = lr
-
-
-def model_load():
-    model = YOLOv3(num_classes=config.NUM_CLASSES).to(config.DEVICE)
-    optimizer = optim.Adam(
-        model.parameters(), lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY
-    )
-
-    if config.LOAD_MODEL:
-        load_checkpoint(
-            config.CHECKPOINT_FILE, model, optimizer, config.LEARNING_RATE
-        )
-    
-    return model
 
 
 def get_loaders(train_csv_path, test_csv_path):
@@ -553,7 +550,6 @@ def plot_couple_examples(model, loader, thresh, iou_thresh, anchors):
             bboxes[i], iou_threshold=iou_thresh, threshold=thresh, box_format="midpoint",
         )
         plot_image(x[i].permute(1, 2, 0).detach().cpu(), nms_boxes)
-
 
 
 def seed_everything(seed=42):

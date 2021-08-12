@@ -36,7 +36,7 @@ def prediction(x, model):
 
     for i in range(batch_size):
         nms_boxes = utils.non_max_suppression(
-            bboxes[i], iou_threshold=0.6, threshold=0.5, box_format="midpoint", # iyi bir tespit için bunun ayarlanması gerekiyor. iou_threshold ve threshold
+            bboxes[i], iou_threshold=0.4, threshold=0.8, box_format="midpoint", # iyi bir tespit için bunun ayarlanması gerekiyor. iou_threshold ve threshold
         )
 
         utils.plot_w_cv2(x[i].permute(1, 2, 0).detach().cpu(), nms_boxes) # Görselleştirme amaçlı, görselleştirme istemiyorsan bunu kapat.
@@ -47,10 +47,15 @@ def prediction(x, model):
 
 if __name__ == "__main__":
     model = utils.model_load()
-    image_file = "00051.jpg"
+    image_file = "data3_586.jpg"
     image = np.array(Image.open(image_file).convert("RGB"))
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     transform = config.pred_transforms(image=image)
     image = transform["image"]
     class_pred = prediction(image, model) # sahnede tespit ettiği nesnelerin değerlerini dönüyor.
-    cv2.waitKey(10000)
+
+    while True:
+        if cv2.waitKey(1) == 27: # esc basarsanız görsel kapanır.
+            break
+
     print(class_pred)

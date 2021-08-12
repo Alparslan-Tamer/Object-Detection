@@ -23,8 +23,8 @@ NMS_IOU_THRESH = 0.45
 
 S = [IMAGE_SIZE // 32, IMAGE_SIZE // 16, IMAGE_SIZE // 8]
 PIN_MEMORY = True
-LOAD_MODEL = True # prediction yapacaksanız bunu True yapın (Eğer modeliniz var ise)
-SAVE_MODEL = False # eğitim yapacaksanız bunu True yapın
+LOAD_MODEL = False # prediction yapacaksanız bunu True yapın (Eğer modeliniz var ise)
+SAVE_MODEL = True # eğitim yapacaksanız bunu True yapın
 CHECKPOINT_FILE = "checkpoint.pth.tar"
 IMG_DIR = DATASET + "/images/"
 LABEL_DIR = DATASET + "/labels/"
@@ -47,15 +47,6 @@ train_transforms = A.Compose(
         ),
         A.RandomCrop(width=IMAGE_SIZE, height=IMAGE_SIZE),
         A.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.3, p=0.2),
-        # A.OneOf(
-        #     [
-        #         A.ShiftScaleRotate(
-        #             rotate_limit=20, p=0.5, border_mode=cv2.BORDER_CONSTANT
-        #         ),
-        #         A.IAAAffine(shear=15, p=0.5, mode="constant"),
-        #     ],
-        #     p=1.0,
-        # ),
         A.Blur(p=0.1),
         A.CLAHE(p=0.1),
         A.Posterize(p=0.1),

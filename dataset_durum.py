@@ -19,13 +19,11 @@ for i in range(number_files):
     for j in co_list:
         if j:
             counter += 1
-    print(content)
-    print(counter)
 
     for k in range(counter):
         label = content.split("\n")
         label = int(label[k].split(" ")[0])
         labels.append(config.CUSTOM_CLASSES[label])
-print(len(labels))
+
 df = pd.DataFrame({'siniflar': labels})
 print(df.value_counts(ascending=True))

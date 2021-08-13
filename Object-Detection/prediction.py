@@ -4,7 +4,6 @@ Prediction fonksiyonu
 
 import utils
 import config
-import torch.optim as optim
 import torch
 from PIL import Image
 import numpy as np
@@ -44,7 +43,7 @@ def prediction(x, model):
 
 if __name__ == "__main__":
     model = utils.model_load() # modelimizi import ediyoruz.
-    image_file = "data3_586.jpg"
+    image_file = "deneme.jpg"
     image = np.array(Image.open(image_file).convert("RGB"))
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     transform = config.pred_transforms(image=image)

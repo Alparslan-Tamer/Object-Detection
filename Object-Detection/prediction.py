@@ -2,7 +2,6 @@
 Prediction fonksiyonu
 """
 
-from model import YOLOv3
 import utils
 import config
 import torch.optim as optim
@@ -12,8 +11,6 @@ import numpy as np
 import cv2
 
 def prediction(x, model):
-
-    
     scaled_anchors = (
             torch.tensor(config.ANCHORS)
             * torch.tensor(config.S).unsqueeze(1).unsqueeze(1).repeat(1, 3, 2)
@@ -46,7 +43,7 @@ def prediction(x, model):
 
 
 if __name__ == "__main__":
-    model = utils.model_load()
+    model = utils.model_load() # modelimizi import ediyoruz.
     image_file = "data3_586.jpg"
     image = np.array(Image.open(image_file).convert("RGB"))
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)

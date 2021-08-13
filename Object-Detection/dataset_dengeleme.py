@@ -1,3 +1,8 @@
+"""
+Bu kodu eğer datasetimiz dengesiz ise dengeyi ayarlamak için kullanıyoruz.
+"""
+
+
 import pandas as pd
 import os
 import config
@@ -21,22 +26,22 @@ for i in range(number_files):
         if j:
             counter += 1
 
-    deneme = []
+    label_list = []
     for k in range(counter):
         label = content.split("\n")
         label = int(label[k].split(" ")[0])
-        deneme.append(label)
+        label_list.append(label)
 
-    if labels.count("Durak_Isareti") > 900 and (4 in deneme):
+    if labels.count("Durak_Isareti") > 900 and (4 in label_list):
         pass
-    elif labels.count("Sola_Mecburi_Donus") > 900 and (8 in deneme):
+    elif labels.count("Sola_Mecburi_Donus") > 900 and (8 in label_list):
         pass
-    elif labels.count("Ileri_ve_Saga_Donus") > 800 and (18 in deneme):
+    elif labels.count("Ileri_ve_Saga_Donus") > 800 and (18 in label_list):
         pass
-    elif labels.count("Saga_Donulemez") > 1000 and (5 in deneme):
+    elif labels.count("Saga_Donulemez") > 1000 and (5 in label_list):
         pass
     else:
-        for l in deneme:
+        for l in label_list:
             labels.append(config.CUSTOM_CLASSES[l])
         file_names.append(files_names[i])
         

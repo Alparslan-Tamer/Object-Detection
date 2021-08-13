@@ -1,3 +1,7 @@
+"""
+Dataset içindeki sınıfların sayısına bakmak için kullandığımız kod.
+"""
+
 import pandas as pd
 import os
 import config

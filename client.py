@@ -6,26 +6,31 @@ ROS Düğümü Oluşturma
 
 import rospy
 import cv2
-from cv_bridge import CvBridge
+import PIL
 from sensor_msgs.msg import Image
 from prediction import prediction
 import config
 import utils
+import time
+import numpy as np
 
 class Kamera():
     def __init__(self):
         self.model = utils.model_load()
         rospy.init_node("kamera_dugumu")
-        self.bridge = CvBridge()
-        rospy.Subscriber("camera/rgb/image_raw", Image, self.kameraCallback)
+        rospy.Subscriber("/cart/front_camera/image_raw", Image, self.kameraCallback)
         rospy.spin()
 
     def kameraCallback(self, mesaj):
-        image = self.bridge.imgmsg_to_cv2(mesaj, "bgr8") # bu dönüştürme işlemini kendi yönteminiz ile yapın bence. Ben hızlı olsun diye
-                                                         # turtlebot3 üzerinden yaptım diye bu kütüphaneyi kullandım ama sonuçlar orjinal resimler kadar iyi değil bence
+        time.sleep(0.5)
+        image = np.frombuffer(mesaj.data, dtype=np.uint8).reshape(mesaj.height, mesaj.width, 3)[..., ::-1]
+        cv2.imwrite("obj_det_im.jpg", image)
+        image = np.array(PIL.Image.open("obj_det_im.jpg").convert("RGB"))    
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)                                     
         transform = config.pred_transforms(image=image)
         image = transform["image"]
-        classes = prediction(image, self.model)
+        classes = prediction(image, self.model) # sahnede tespit edilen nesneleri liste olarak döner.
+        print(classes)
         cv2.waitKey(1)
 
 Kamera()

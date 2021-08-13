@@ -1,5 +1,5 @@
 """
-Implementation of YOLOv3 architecture
+YOLOv3 Model Class
 """
 
 import torch
